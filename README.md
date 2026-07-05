@@ -19,16 +19,21 @@ El cuaderno implementa un flujo de trabajo enfocado en la solidez estadística:
 2. **Tratamiento de Variables:** Dummificación y codificación de factores categóricos estructurales (afiliaciones a EsSalud, SIS, Seguro Privado y estratos geográficos).
 3. **Modelado de Regresión:** Ajuste de coeficientes para medir la probabilidad de ocurrencia del evento crónico, evaluando los pesos relativos mediante métricas de bondad de ajuste.
 
-## 3. Estructura de Variables Evaluadas
+## 3. Estructura de Variables Evaluadas (Feature Engineering)
 
-| Dimensión | Variable | Tratamiento Estadístico | Descripción |
-| :--- | :--- | :--- | :--- |
-| **Target** | `cronico` | Binaria (0 / 1) | Presencia de enfermedad crónica autorreportada. |
-| **Demográfica** | `edad` | Continua | Factor de riesgo biológico principal medido en años. |
-| **Demográfica** | `genero` / `sexo` | Binaria codificada | Control de variabilidad biológica entre hombres y mujeres. |
-| **Geográfica** | `estrato_urbano_rural` | Binaria dummificada | Control del entorno de residencia y densidad poblacional. |
-| **Acceso Institucional** | `seguro_essalud` | Binaria dummificada | Impacto de la cobertura de seguridad social contributiva. |
-| **Acceso Subsidiado** | `seguro_sis` | Binaria dummificada | Impacto del aseguramiento público para poblaciones vulnerables. |
+Para garantizar la estabilidad matemática del modelo de Regresión Logística y evitar problemas de multicolinealidad, las variables originales de la ENAHO pasaron por un proceso de transformación (codificación y estandarización):
+
+| Dimensión | Variable Original | Variable en el Modelo | Tipo de Dato / Tratamiento | Descripción |
+| :--- | :--- | :--- | :--- | :--- |
+| **Target** | `P401` | `cronico` | Categórica Binaria (0 / 1) | **Variable Objetivo:** Presencia de enfermedad crónica autorreportada. |
+| **Demográfica** | `P208A` | `edad_escalada` | Numérica Estandarizada | Edad cronológica en años, normalizada para equilibrar los pesos de los coeficientes del modelo. |
+| **Demográfica** | `P207` | `sexo_encoded` | Binaria Codificada (0 / 1) | Género del encuestado transformado mediante `LabelEncoder` para su procesamiento algorítmico. |
+| **Geográfica** | `AREA` | `estrato_urbano_rural`| Binaria dummificada | Control del entorno de residencia y densidad poblacional (Urbano vs. Rural). |
+| **Acceso** | `P4191` | `seguro_essalud` | Binaria dummificada | Cobertura de seguridad social contributiva (EsSalud). |
+| **Acceso** | `P4195` | `seguro_sis` | Binaria dummificada | Cobertura de aseguramiento público subsidiado (SIS). |
+| **Acceso** | `P4192` | `seguro_privado` | Binaria dummificada | Cobertura de seguro privado de salud o EPS. |
+
+> **Nota de Ingeniería de Datos:** Durante la fase de preparación del dataset, las columnas originales en texto (`sexo`) y en escala natural (`edad`) fueron descartadas del set de entrenamiento definitivo, conservando únicamente sus versiones transformadas (`sexo_encoded` y `edad_escalada`). Esto previene la colinealidad perfecta y optimiza la convergencia del optimizador de la regresión.
 
 ## 4. Conclusiones Clave del Modelo
 
